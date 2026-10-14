@@ -2,8 +2,21 @@
 
 **Rush** is a modern extension builder for MIT App Inventor 2.
 
-This is a maintained fork of [shreyashsaitwal/rush-cli](https://github.com/shreyashsaitwal/rush-cli),
-created by Shreyash Saitwal, which brings Rush 2.0 to a stable release.
+> [!IMPORTANT]
+> **Rush has moved back to [shreyashsaitwal/rush-cli](https://github.com/shreyashsaitwal/rush-cli),
+> where Rush 2.0.0 is released.** This fork is no longer maintained. Its releases stay, so
+> workflows using `zainulhassan815/rush-cli@v2` keep working, but new versions ship only
+> upstream. To switch:
+>
+> - Install Rush from [upstream](https://github.com/shreyashsaitwal/rush-cli#installation):
+>   `rush upgrade` from this fork's releases doesn't reach it.
+> - In `.github/workflows/build.yml`, use `shreyashsaitwal/rush-cli@v2`.
+> - Run `rush agents` to update the dev container and Copilot setup.
+>
+> Open issues moved upstream too.
+
+This was a maintained fork of [shreyashsaitwal/rush-cli](https://github.com/shreyashsaitwal/rush-cli),
+created by Shreyash Saitwal, which brought Rush 2.0 to a stable release.
 
 ## Features
 
