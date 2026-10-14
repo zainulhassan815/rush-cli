@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="dev.rush.live">
+
+    <application>
+        <!-- You can use any manifest tag that goes inside the <application> tag -->
+        <!-- <service android:name="com.example.MyService"> ... </service> -->
+    </application>
+
+    <!-- Other than <application> level tags, you can use <uses-permission> & <queries> tags -->
+    <!-- <uses-permission android:name="android.permission.SEND_SMS"/> -->
+    <!-- <queries> ... </queries> -->
+
+</manifest>

@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="live-token" content="{{token}}">
+<title>Rush Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  color-scheme: light dark;
+  --ink: light-dark(#1c1917, #e7e5e4); --muted: light-dark(#57534e, #a8a29e); --faint: light-dark(#78716c, #8a837e); --line: light-dark(#e7e5e4, #2e2b29);
+  --hair: light-dark(#f0efee, #252220); --wash: light-dark(#f5f5f4, #1f1d1b); --ok: light-dark(#15803d, #4ade80); --bad: light-dark(#991b1b, #fca5a5);
+  --bad-wash: light-dark(#fdf2f2, #2a1717); --warn: light-dark(#7a5512, #f2c574); --warn-wash: light-dark(#fdf8ec, #2a2213); --live: light-dark(#16a34a, #22c55e);
+  --call: light-dark(#4c3591, #c4b5fd); --call-wash: light-dark(#eee9f8, #2a2340); --prop: light-dark(#2b6b35, #86efac); --prop-wash: light-dark(#e6f2e7, #16291b);
+  --when: light-dark(#7a5512, #f2c574); --when-wash: light-dark(#f7eed9, #2e2512); --bg: light-dark(#ffffff, #151312); --mono: 'Geist Mono', ui-monospace, monospace;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 'Geist', system-ui, sans-serif; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.mono { font-family: var(--mono); font-size: 12px; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+.brand { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.grow { flex-grow: 1; }
+.phase { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 4px; background: var(--faint); }
+.phase[data-tone="ok"] .dot { background: var(--live); }
+.phase[data-tone="busy"] .dot { background: #d97706; animation: pulse 1s infinite alternate; }
+.phase[data-tone="bad"] .dot { background: #dc2626; }
+@keyframes pulse { to { opacity: 0.3; } }
+.btn { height: 34px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); font-size: 13px; }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 500; }
+.btn.small { height: 30px; padding: 0 12px; font-size: 12px; }
+.btn.quiet { border-color: transparent; color: var(--muted); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.banner { margin: 16px 24px 0; padding: 12px 14px; border-radius: 8px; }
+.banner.bad { background: var(--bad-wash); color: var(--bad); }
+.banner.warn { background: var(--warn-wash); color: var(--warn); }
+.banner strong { display: block; margin-bottom: 4px; }
+.banner pre { margin: 6px 0 0; white-space: pre-wrap; font-family: var(--mono); font-size: 12px; }
+main { display: flex; flex-wrap: wrap; align-items: stretch; min-height: calc(100vh - 60px); overflow-x: clip; }
+aside.left { flex: 1 1 260px; max-width: 100%; min-width: 0; padding: 20px 16px; border-right: 1px solid var(--line); }
+section.blocks { flex: 999 1 520px; min-width: 0; padding: 20px 28px; }
+aside.events { flex: 1 1 320px; max-width: 100%; min-width: 0; padding: 20px 0; border-left: 1px solid var(--line); }
+.label { font-size: 12px; font-weight: 600; color: var(--muted); padding: 0 8px 6px; display: flex; justify-content: space-between; align-items: baseline; }
+.component-row { display: grid; grid-template-columns: minmax(0, 1fr) 28px; align-items: center; gap: 2px; }
+.component { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 38px; min-width: 0; align-items: baseline; gap: 8px; width: 100%; height: 38px; padding: 0 8px; border: 0; border-radius: 6px; background: none; text-align: left; }
+.component[aria-current="true"] { background: var(--wash); font-weight: 600; }
+.component span { color: var(--faint); font-size: 12px; font-weight: 400; }
+.add { display: grid; gap: 6px; padding: 8px; }
+.add input, .add select, .field input, .field select { height: 32px; padding: 0 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); min-width: 0; }
+.rule { height: 1px; background: var(--line); margin: 16px 8px; }
+.steps { list-style: none; margin: 0; padding: 0 0 0 8px; }
+.steps li { display: grid; grid-template-columns: 16px minmax(0, 1fr) 28px; align-items: center; gap: 8px; min-height: 30px; }
+.steps .n { color: var(--faint); text-align: right; }
+.steps .text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.steps li.failed .text { color: var(--bad); }
+.x { width: 28px; height: 28px; border: 0; background: none; color: var(--faint); border-radius: 4px; }
+.x:hover { background: var(--wash); color: var(--ink); }
+.title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 4px; }
+.title h1 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+.title p { margin: 0; color: var(--faint); }
+.filter { height: 34px; width: 220px; padding: 0 10px; border: 0; border-radius: 6px; background: var(--wash); }
+h2 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 22px 0 0; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 0; border-bottom: 1px solid var(--hair); }
+.tag { font: 600 11px var(--mono); border-radius: 4px; padding: 2px 6px; }
+.tag.call { color: var(--call); background: var(--call-wash); }
+.tag.prop { color: var(--prop); background: var(--prop-wash); }
+.tag.when { color: var(--when); background: var(--when-wash); }
+.tag.error { color: var(--bad); background: var(--bad-wash); }
+.name { font-weight: 600; min-width: 140px; }
+.desc { flex-basis: 100%; margin: -4px 0 0; color: var(--faint); font-size: 12px; }
+.field { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.field input[type="text"] { width: 180px; font-family: var(--mono); font-size: 12px; }
+.field input[type="number"] { width: 90px; font-family: var(--mono); font-size: 12px; }
+.result { flex-basis: 100%; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.result.ok { color: var(--ok); }
+.result.bad { color: var(--bad); }
+.empty { color: var(--faint); padding: 24px 0; }
+.feed { display: flex; flex-direction: column; }
+.event { padding: 9px 20px; border-top: 1px solid var(--hair); display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 2px 8px; }
+.event time { color: var(--faint); }
+.event .args { grid-column: 2; color: var(--muted); overflow-wrap: anywhere; }
+.event .count { color: var(--faint); font-weight: 400; font-size: 12px; }
+.mute { border: 0; background: none; padding: 0; text-align: left; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.event > span { min-width: 0; }
+.mute:hover { text-decoration: line-through; }
+.muted-list { padding: 4px 20px 10px; font-size: 12px; color: var(--faint); }
+.muted-list button { border: 0; background: none; padding: 0 6px 0 0; color: var(--muted); text-decoration: underline; font-size: 12px; }
+:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+</style>
+<script>try { const theme = localStorage.getItem('live-theme'); if (theme) document.documentElement.dataset.theme = theme; } catch {}</script>
+</head>
+<body>
+<header>
+  <span class="brand">Rush Live</span>
+  <span class="grow"></span>
+  <button class="btn small quiet" id="theme" type="button">System theme</button>
+  <span class="phase" id="phase" data-tone="busy"><span class="dot"></span><span id="phase-text">Connecting</span></span>
+  <button class="btn" id="rebuild" type="button">Rebuild app</button>
+  <button class="btn primary" id="reload" type="button">Reload</button>
+</header>
+<div id="banners"></div>
+<main>
+  <aside class="left">
+    <div class="label">Components</div>
+    <div id="components"></div>
+    <form class="add" id="add">
+      <select id="add-type" aria-label="Component type"></select>
+      <input id="add-name" aria-label="Component name" placeholder="Name" required pattern="[A-Za-z][A-Za-z0-9_]*" title="Letters, digits and _, starting with a letter">
+      <button class="btn small" type="submit">Add component</button>
+    </form>
+    <div class="rule"></div>
+    <div class="label"><span>Session</span><span class="mono">live.jsonl</span></div>
+    <ol class="steps mono" id="steps"></ol>
+    <div style="display: flex; gap: 6px; padding: 12px 8px 0">
+      <button class="btn small" id="replay" type="button">Replay</button>
+      <button class="btn small quiet" id="clear-session" type="button">Clear</button>
+    </div>
+  </aside>
+  <section class="blocks" id="blocks"></section>
+  <aside class="events">
+    <div class="label" style="padding: 0 20px 8px"><span>Events</span><button class="btn small quiet" id="clear-events" type="button">Clear</button></div>
+    <div class="muted-list" id="muted" hidden></div>
+    <div class="feed" id="feed"></div>
+  </aside>
+</main>
+<script>
+const token = document.querySelector('meta[name="live-token"]').content;
+const state = { selected: null, components: [], session: [], metadata: [], builtIns: [], since: 0, events: [], muted: new Set(), shownSince: 0, renderedFor: null };
+const $ = (id) => document.getElementById(id);
+const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const json = (value) => JSON.stringify(value);
+
+async function api(path, body) {
+  const headers = { 'X-Live-Token': token };
+  const response = await fetch(path, body === undefined ? { headers } : { method: 'POST', headers, body: json(body) });
+  return response.json();
+}
+
+function typeOf(name) {
+  if (name === 'Screen1') return 'Form';
+  const step = state.session.find((s) => s.verb === 'create' && s.args[1] === name);
+  return step ? step.args[0] : null;
+}
+
+function describe(type) {
+  return state.metadata.find((c) => c.name === type) || state.builtIns.find((c) => c.name === type) || null;
+}
+
+function stepText(step) {
+  const [target, block, ...rest] = step.args;
+  if (step.verb === 'create') return `create ${block} (${target})`;
+  if (step.verb === 'set') return `${target}.${block} = ${rest.join(' ')}`;
+  return `${target}.${block}${rest.length ? ' ' + rest.map((a) => json(a)).join(' ') : ''}`;
+}
+
+function renderPhase(phase, reload) {
+  const tone = phase === 'ready' || phase === 'idle' ? 'ok' : phase === 'failed' || phase === 'crashed' || phase === 'stopped' ? 'bad' : 'busy';
+  $('phase').dataset.tone = tone;
+  let text = { ready: 'Ready', failed: 'Build failed', crashed: 'App crashed', stopped: 'App closed', idle: 'Idle' }[phase] || phase[0].toUpperCase() + phase.slice(1) + '…';
+  if (phase === 'ready' && reload && reload.ms) {
+    const total = Object.values(reload.ms).reduce((a, b) => a + b, 0);
+    text = `Reloaded in ${(total / 1000).toFixed(1)}s · ${new Date(reload.at).toLocaleTimeString()}`;
+  }
+  if (phase === 'waiting for unlock') text = 'Unlock your phone';
+  $('phase-text').textContent = text;
+  $('reload').disabled = $('rebuild').disabled = tone === 'busy';
+}
+
+function renderBanners(phase, reload, crash) {
+  const parts = [];
+  if (phase === 'stopped') {
+    parts.push(`<div class="banner warn"><strong>The app was closed on the phone</strong><button class="btn small" type="button" data-restart style="margin-top: 8px">Restart</button></div>`);
+  }
+  if (crash) {
+    const error = crash.error || {};
+    const removed = error.removedFromSession ? `\nRemoved ${stepText(error.removedFromSession)} from the session: the app crashed right after it.` : '';
+    parts.push(`<div class="banner bad" role="alert"><strong>The app crashed</strong><pre>${esc((error.crash ? errorText(error.crash) : error.message) + removed)}</pre><button class="btn small" type="button" data-restart style="margin-top: 8px">Restart</button></div>`);
+  }
+  if (reload && reload.ok === false) {
+    const error = reload.error || {};
+    const details = (error.errors || []).concat(error.output ? [error.output] : []).join('\n\n');
+    parts.push(`<div class="banner bad" role="alert"><strong>${esc(error.message || error.type)}</strong>${details ? `<pre>${esc(details)}</pre>` : ''}</div>`);
+  }
+  for (const failure of (reload && reload.replayFailures) || []) {
+    parts.push(`<div class="banner warn"><strong>Replay failed: ${esc(stepText(failure.step))}</strong><pre>${esc(errorText(failure.error))}</pre></div>`);
+  }
+  for (const step of (reload && reload.removedFromSession) || []) {
+    parts.push(`<div class="banner warn"><strong>Removed ${esc(stepText(step))} from the session</strong>The app crashed right after it, so it would crash again on every restart.</div>`);
+  }
+  if (reload && reload.previousCrash) {
+    parts.push(`<div class="banner bad" role="alert"><strong>The app crashed before this restart</strong><pre>${esc(errorText(reload.previousCrash))}</pre></div>`);
+  }
+  $('banners').innerHTML = parts.join('');
+}
+
+function errorText(error) {
+  return `${error.type}${error.message ? ': ' + error.message : ''}${(error.at || []).map((f) => '\n  at ' + f).join('')}`;
+}
+
+function renderComponents() {
+  const names = state.session.filter((s) => s.verb === 'create').map((s) => ({ name: s.args[1], type: s.args[0] }));
+  state.components = names;
+  if (!state.selected || !names.some((c) => c.name === state.selected)) {
+    state.selected = (names.find((c) => describe(c.type)) || names[0] || {}).name || null;
+  }
+  $('components').innerHTML = names.map((c) => `<div class="component-row"><button class="component" type="button" data-name="${esc(c.name)}" aria-current="${c.name === state.selected}" title="${esc(c.name)} · ${esc(c.type)}">${esc(c.name)} <span>${esc(c.type)}</span></button><button class="x" type="button" data-remove-component="${esc(c.name)}" aria-label="Remove ${esc(c.name)}">×</button></div>`).join('') || '<div class="empty" style="padding: 4px 8px 8px">No components yet</div>';
+  $('steps').innerHTML = state.session.map((step, i) => `<li><span class="n">${i + 1}</span><span class="text" title="${esc(stepText(step))}">${esc(stepText(step))}</span><button class="x" type="button" data-remove="${i}" aria-label="Remove step ${i + 1}">×</button></li>`).join('');
+}
+
+function renderAddTypes() {
+  const current = $('add-type').value;
+  const options = (list) => list.map((c) => `<option>${esc(c.name)}</option>`).join('');
+  const builtIns = [...state.builtIns].sort((a, b) => a.name.localeCompare(b.name));
+  $('add-type').innerHTML = `<optgroup label="Your extension">${options(state.metadata)}</optgroup><optgroup label="Built-in">${options(builtIns)}</optgroup>`;
+  if (current && [...$('add-type').options].some((o) => o.value === current)) $('add-type').value = current;
+  suggestName();
+}
+
+function suggestName() {
+  const type = $('add-type').value;
+  const taken = new Set(state.components.map((c) => c.name));
+  let n = 1;
+  while (taken.has(type + n)) n++;
+  $('add-name').value = type + n;
+}
+
+function input(param, id) {
+  const options = param.helper && param.helper.data && param.helper.data.options;
+  if (options) return `<select id="${id}">${options.map((o) => `<option value="${esc(o.value)}" title="${esc(o.description || '')}">${esc(o.name)}</option>`).join('')}</select>`;
+  if (param.type === 'boolean') return `<select id="${id}"><option>true</option><option>false</option></select>`;
+  if (param.type === 'component') return `<select id="${id}">${['Screen1', ...state.components.map((c) => c.name)].map((n) => `<option>${esc(n)}</option>`).join('')}</select>`;
+  if (param.type === 'number') return `<input id="${id}" type="number" step="any" value="0">`;
+  const placeholder = { list: '[1, 2]', dictionary: '{"key": "value"}' }[param.type] || '';
+  return `<input id="${id}" type="text" placeholder="${placeholder}">`;
+}
+
+function field(param, id) {
+  return `<label class="field">${esc(param.name)}${input(param, id)}</label>`;
+}
+
+function valueOf(param, id) {
+  const raw = $(id).value;
+  if (param.type === 'number') return Number(raw);
+  if (param.type === 'boolean') return raw === 'true';
+  if (param.type === 'list' || param.type === 'dictionary' || param.type === 'any') {
+    try { return JSON.parse(raw); } catch { return raw; }
+  }
+  return raw;
+}
+
+function renderBlocks() {
+  const component = state.components.find((c) => c.name === state.selected);
+  const key = component ? component.name + ':' + component.type + ':' + state.metadata.length + ':' + state.components.length : '';
+  if (key === state.renderedFor) return;
+  state.renderedFor = key;
+  if (!component) {
+    $('blocks').innerHTML = '<p class="empty">Add a component to start. Your extension\'s components are listed first; built-ins like VerticalArrangement or Button work too.</p>';
+    return;
+  }
+  const meta = describe(component.type);
+  const header = `<div class="title"><h1>${esc(component.name)}</h1><p>${esc(component.type)}${state.builtIns.includes(meta) ? ' · built-in' : ''} · ${meta.methods.length} methods · ${meta.blockProperties.length} properties · ${meta.events.length} events</p><span class="grow"></span><input class="filter" id="filter" type="search" placeholder="Filter blocks" aria-label="Filter blocks"></div>`;
+  const methods = meta.methods.map((m, i) => `<div class="row" data-block="${esc(m.name)}">
+      <span class="tag call">call</span><span class="name">${esc(m.name)}</span>
+      ${m.params.map((p, j) => field(p, `m${i}p${j}`)).join('')}
+      <span class="grow"></span><button class="btn small${i === 0 ? '' : ''}" type="button" data-method="${i}">Run</button>
+      <p class="desc">${esc(m.description || '')}${m.returnType ? ` <span class="mono">→ ${esc(m.returnType)}</span>` : ''}</p>
+      <div class="result" id="m${i}r"></div></div>`).join('');
+  const properties = meta.blockProperties.map((p, i) => {
+    const readable = p.rw !== 'write-only';
+    const writable = p.rw !== 'read-only';
+    return `<div class="row" data-block="${esc(p.name)}">
+      <span class="tag prop">${readable && writable ? 'get · set' : readable ? 'get' : 'set'}</span><span class="name">${esc(p.name)}</span>
+      ${writable ? field({ ...p, name: 'value' }, `p${i}v`) : ''}
+      <span class="grow"></span>
+      ${readable ? `<button class="btn small" type="button" data-get="${i}">Get</button>` : ''}
+      ${writable ? `<button class="btn small" type="button" data-set="${i}">Set</button>` : ''}
+      <p class="desc">${esc(p.description || '')}</p>
+      <div class="result" id="p${i}r"></div></div>`;
+  }).join('');
+  $('blocks').innerHTML = header + `<h2>Methods</h2>${methods}<h2>Properties</h2>${properties}`;
+}
+
+function showResult(id, response) {
+  const target = $(id);
+  if (response.ok) {
+    target.className = 'result ok';
+    target.textContent = response.result === null ? 'Done' : '→ ' + json(response.result);
+  } else {
+    target.className = 'result bad';
+    target.textContent = errorText(response.error);
+  }
+}
+
+async function command(verb, args, resultId) {
+  const response = await api('/api/command', { verb, args });
+  showResult(resultId, response);
+  refreshState();
+}
+
+$('blocks').addEventListener('click', (event) => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  const component = state.components.find((c) => c.name === state.selected);
+  const meta = describe(component.type);
+  if (button.dataset.method !== undefined) {
+    const i = Number(button.dataset.method);
+    const method = meta.methods[i];
+    command('call', [component.name, method.name, ...method.params.map((p, j) => valueOf(p, `m${i}p${j}`))], `m${i}r`);
+  } else if (button.dataset.get !== undefined) {
+    const i = Number(button.dataset.get);
+    command('get', [component.name, meta.blockProperties[i].name], `p${i}r`);
+  } else if (button.dataset.set !== undefined) {
+    const i = Number(button.dataset.set);
+    const property = meta.blockProperties[i];
+    command('set', [component.name, property.name, valueOf({ ...property, name: 'value' }, `p${i}v`)], `p${i}r`);
+  }
+});
+
+$('blocks').addEventListener('input', (event) => {
+  if (event.target.id !== 'filter') return;
+  const query = event.target.value.toLowerCase();
+  for (const row of document.querySelectorAll('#blocks .row')) {
+    row.hidden = !row.dataset.block.toLowerCase().includes(query) && !row.textContent.toLowerCase().includes(query);
+  }
+});
+
+$('components').addEventListener('click', (event) => {
+  const remove = event.target.closest('[data-remove-component]');
+  if (remove) {
+    const name = remove.dataset.removeComponent;
+    const uses = state.session.filter((s) => s.verb === 'create' ? s.args[1] === name : s.args.includes(name)).length;
+    if (confirm(`Remove ${name}? ${uses} session step${uses === 1 ? '' : 's'} use it and will be removed, then the app restarts.`)) {
+      api('/api/remove', { name });
+      setTimeout(refreshState, 200);
+    }
+    return;
+  }
+  const button = event.target.closest('[data-name]');
+  if (!button) return;
+  state.selected = button.dataset.name;
+  renderComponents();
+  renderBlocks();
+});
+
+$('steps').addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-remove]');
+  if (!button) return;
+  api('/api/session/remove', { index: Number(button.dataset.remove) });
+  setTimeout(refreshState, 200);
+});
+
+$('add-type').addEventListener('change', suggestName);
+
+$('add').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const type = $('add-type').value;
+  const name = $('add-name').value.trim();
+  const response = await api('/api/command', { verb: 'create', args: [type, name] });
+  if (!response.ok) { alert(errorText(response.error)); return; }
+  state.selected = name;
+  await refreshState();
+});
+
+$('reload').addEventListener('click', () => { api('/api/reload', {}); setTimeout(refreshState, 200); });
+$('rebuild').addEventListener('click', () => { api('/api/rebuild', {}); setTimeout(refreshState, 200); });
+$('banners').addEventListener('click', (event) => {
+  if (!event.target.closest('[data-restart]')) return;
+  api('/api/restart', {});
+  setTimeout(refreshState, 200);
+});
+const themes = { '': 'System theme', light: 'Light theme', dark: 'Dark theme' };
+function renderTheme() { $('theme').textContent = themes[document.documentElement.dataset.theme || '']; }
+$('theme').addEventListener('click', () => {
+  const order = Object.keys(themes);
+  const next = order[(order.indexOf(document.documentElement.dataset.theme || '') + 1) % order.length];
+  if (next) document.documentElement.dataset.theme = next; else delete document.documentElement.dataset.theme;
+  try { if (next) localStorage.setItem('live-theme', next); else localStorage.removeItem('live-theme'); } catch {}
+  renderTheme();
+});
+renderTheme();
+$('replay').addEventListener('click', () => { api('/api/restart', {}); setTimeout(refreshState, 200); });
+$('clear-session').addEventListener('click', () => { if (confirm('Clear the session and restart the app?')) { api('/api/session/clear', {}); setTimeout(refreshState, 200); } });
+$('clear-events').addEventListener('click', () => { state.shownSince = state.since; renderFeed(); });
+
+$('feed').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-mute]');
+  if (!button) return;
+  state.muted.add(button.dataset.mute);
+  renderFeed();
+});
+
+$('muted').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-unmute]');
+  if (!button) return;
+  state.muted.delete(button.dataset.unmute);
+  renderFeed();
+});
+
+function renderFeed() {
+  const visible = state.events.filter((e) => e.seq > state.shownSince && !state.muted.has(e.event));
+  const groups = [];
+  for (const event of visible) {
+    const last = groups[groups.length - 1];
+    const key = event.component + '.' + event.event;
+    if (last && last.key === key) { last.count++; last.event = event; } else groups.push({ key, count: 1, event });
+  }
+  $('feed').innerHTML = groups.reverse().slice(0, 200).map(({ key, count, event }) => {
+    const args = event.named ? Object.entries(event.named).map(([k, v]) => `${k} = ${json(v)}`).join(', ') : event.args.map(json).join(', ');
+    return `<div class="event"><time class="mono">${new Date(event.time).toLocaleTimeString([], { hour12: false })}</time>
+      <span><button class="mute" type="button" data-mute="${esc(event.event)}" title="Hide ${esc(event.event)}">${esc(key)}</button>${count > 1 ? ` <span class="count">×${count}</span>` : ''}</span>
+      <span class="args mono">${esc(args)}</span></div>`;
+  }).join('') || '<p class="empty" style="padding: 12px 20px">Events from your components show up here.</p>';
+  $('muted').hidden = state.muted.size === 0;
+  $('muted').innerHTML = 'Hidden: ' + [...state.muted].map((name) => `<button type="button" data-unmute="${esc(name)}">${esc(name)}</button>`).join('');
+}
+
+async function refreshState() {
+  try {
+    const s = await api('/api/state');
+    state.session = s.session;
+    if (json(s.components) !== json(state.metadata)) { state.metadata = s.components; renderAddTypes(); state.renderedFor = null; }
+    renderPhase(s.phase, s.reload);
+    renderBanners(s.phase, s.reload, s.crash);
+    renderComponents();
+    renderBlocks();
+  } catch {
+    renderPhase('disconnected', null);
+    $('phase-text').textContent = 'rush live is not running';
+    $('phase').dataset.tone = 'bad';
+  }
+}
+
+async function pollEvents() {
+  try {
+    const batch = await api('/api/events?since=' + state.since);
+    if (batch.events.length) {
+      state.events.push(...batch.events);
+      state.events = state.events.slice(-2000);
+      state.since = batch.last;
+      renderFeed();
+    }
+  } catch {}
+}
+
+renderFeed();
+api('/api/builtins').then((response) => { state.builtIns = response.components; renderAddTypes(); state.renderedFor = null; renderBlocks(); });
+refreshState();
+setInterval(refreshState, 1000);
+setInterval(pollEvents, 600);
+</script>
+</body>
+</html>
