@@ -10,8 +10,12 @@
 >
 > - Install Rush from [upstream](https://github.com/shreyashsaitwal/rush-cli#installation):
 >   `rush upgrade` from this fork's releases doesn't reach it.
-> - In `.github/workflows/build.yml`, use `shreyashsaitwal/rush-cli@v2`.
-> - Run `rush agents` to update the dev container and Copilot setup.
+> - Replace `zainulhassan815/rush-cli` with `shreyashsaitwal/rush-cli` in
+>   `.github/workflows/build.yml`, `.github/workflows/copilot-setup-steps.yml` and
+>   `.devcontainer/devcontainer.json`.
+> - Run `rush migrate`: projects created by this fork set `-repackageclasses` in
+>   `src/proguard-rules.pro`, which fails the build in 2.0.0.
+> - Run `rush agents` to refresh the Rush skill for AI agents.
 >
 > Open issues moved upstream too.
 
